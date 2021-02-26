@@ -2,6 +2,9 @@
 
 A marketplace built on top of Nano currency.
 
+## Screenshots
+![Alt text](/screenshots/localnano.png?raw=true "Local Nano")
+
 ## About
 LocalNano is a layer 2 marketplace developed on top of the Nano
 distributed ledger. Sign up is simple, the app will generate 
