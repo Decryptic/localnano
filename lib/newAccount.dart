@@ -1,40 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:local_nano/dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dart:math';
 
 import "constants.dart" as Constants;
+import 'crypto.dart' as Crypto;
 
 class NewAccount extends StatelessWidget {
   NewAccount({Key key})
-      : _secretKey = _generateSecretKey(),
+      : _secretKey = Crypto.generateSecretKey(),
         super(key: key);
 
   final String _secretKey;
 
-  static String _intToHex(int a) {
-    if (0 <= a && a <= 9)
-      return a.toString();
-    if (a == 10)
-      return "A";
-    if (a == 11)
-      return "B";
-    if (a == 12)
-      return "C";
-    if (a == 13)
-      return "D";
-    if (a == 14)
-      return "E";
-    return "F";
+  Route _routeDashboard() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+        final fadeAnimation = animation.drive(tween);
+
+        return FadeTransition(
+          opacity: fadeAnimation,
+          child: child,
+        );
+      },
+    );
   }
 
-  static String _generateSecretKey() {
-    String value = "";
-    var rng = Random();
-    for (int i = 0; i < 64; i++)
-      value = value + _intToHex(rng.nextInt(16));
-    return value;
+  void _savePrivateKey() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(Constants.PREFS_PRIVATE, _secretKey);
   }
 
   void _showAlertDialog(BuildContext context) {
@@ -42,7 +44,12 @@ class NewAccount extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         var yes = FlatButton(
-          onPressed: () {},
+          onPressed: () {
+            _savePrivateKey();
+
+            Navigator.of(context).pop();
+            Navigator.of(context).push(_routeDashboard());
+          },
           child: const Text("Yes"),
         );
 
@@ -111,7 +118,7 @@ class NewAccount extends StatelessWidget {
                             Expanded(
                               child: Center(
                                 child: Text(
-                                  _generateSecretKey(),
+                                  _secretKey,
                                   style: const TextStyle(
                                     fontSize: 15,
                                     color: Colors.red,

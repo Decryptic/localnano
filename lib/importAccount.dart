@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:local_nano/dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'constants.dart' as Constants;
+import 'crypto.dart' as Crypto;
 
 class ImportAccount extends StatefulWidget {
   ImportAccount({Key key}) : super(key: key);
@@ -10,7 +13,49 @@ class ImportAccount extends StatefulWidget {
 }
 
 class _ImportAccountState extends State<ImportAccount> {
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   bool _obscure = true;
+  bool _enabled = false;
+  final _controller = TextEditingController();
+
+  Route _routeDashboard() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+        final fadeAnimation = animation.drive(tween);
+
+        return FadeTransition(
+          opacity: fadeAnimation,
+          child: child,
+        );
+      },
+    );
+  }
+
+  void _savePrivateKey() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(Constants.PREFS_PRIVATE, _controller.text);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller.addListener(() async {
+      setState(
+        () => _enabled = Crypto.isPrivateKey(_controller.text),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +84,14 @@ class _ImportAccountState extends State<ImportAccount> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const Text(
+                        Constants.IMPORT_ADVICE,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.red,
+                        ),
+                      ),
+                      SizedBox(height: 50,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -50,6 +103,7 @@ class _ImportAccountState extends State<ImportAccount> {
                                   primaryColorDark: Colors.red,
                                 ),
                                 child: TextField(
+                                  controller: _controller,
                                   obscureText: _obscure,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(),
@@ -65,9 +119,9 @@ class _ImportAccountState extends State<ImportAccount> {
                                 _obscure = !_obscure;
                               });
                             },
-                            child: Icon(
-                              _obscure ? Icons.lock_outline : Icons.lock_open_outlined
-                            ),
+                            child: Icon(_obscure
+                                ? Icons.lock_outline
+                                : Icons.lock_open_outlined),
                           ),
                         ],
                       ),
@@ -75,12 +129,17 @@ class _ImportAccountState extends State<ImportAccount> {
                         height: 50,
                       ),
                       FlatButton(
-                        onPressed: () {},
-                        child: const Text(
+                        onPressed: _enabled
+                            ? () {
+                                _savePrivateKey();
+                                Navigator.of(context).push(_routeDashboard());
+                              }
+                            : null,
+                        child: Text(
                           'Continue',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: Constants.BTN_FONT_SIZE,
-                            color: Constants.BTN_COLOR,
+                            color: _enabled ? Constants.BTN_COLOR : Colors.grey,
                           ),
                         ),
                       ),

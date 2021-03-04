@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:local_nano/dashboard.dart';
 import 'package:local_nano/importAccount.dart';
 import 'package:local_nano/newAccount.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import "constants.dart" as Constants;
+import 'constants.dart' as Constants;
 
 class LocalNano extends StatelessWidget {
   @override
@@ -27,22 +29,36 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  static const int _durationms      = 2000;
+  static const int _durationms = 1000;
   static const double _buttonHeight = 80;
 
   AnimationController _logoController;
   Animation<Offset> _logoOffsetAnimation;
 
   double _opacity = 0.0;
+  String _existingAccount = "";
+
+  void _loadExistingAccount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var existing = prefs.getString(Constants.PREFS_PRIVATE);
+    if (existing != null) {
+      setState(() {
+        _existingAccount = existing;
+      });
+    }
+  }
 
   Route _routeNew() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => NewAccount(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
-        const end   = Offset.zero;
+        const end = Offset.zero;
         const curve = Curves.easeOutSine;
-        var tween = Tween(begin: begin, end: end,).chain(CurveTween(curve: curve));
+        var tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
         var offsetAnimation = animation.drive(tween);
 
         return SlideTransition(
@@ -58,10 +74,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       pageBuilder: (context, animation, secondaryAnimation) => ImportAccount(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(-1.0, 0.0);
-        const end   = Offset.zero;
+        const end = Offset.zero;
         const curve = Curves.easeOutSine;
-        var tween = Tween(begin: begin, end: end,).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
+        final tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
+        final offsetAnimation = animation.drive(tween);
 
         return SlideTransition(
           position: offsetAnimation,
@@ -71,41 +90,87 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  Route _routeDashboard() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+
+        final tween = Tween(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+        final fadeAnimation = animation.drive(tween);
+
+        return FadeTransition(
+          opacity: fadeAnimation,
+          child: child,
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
-    super.dispose();
     _logoController.dispose();
+    super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+
+    // shared preferences
+    _loadExistingAccount();
+
+    // animations
     _logoController = AnimationController(
-      duration: const Duration(milliseconds: _durationms),
+      duration: const Duration(milliseconds: _durationms*2),
       vsync: this,
     )..forward();
     _logoController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
-          _logoController = AnimationController(
-            duration: const Duration(milliseconds: _durationms),
-            vsync: this,
-          )..forward();
+          if (_existingAccount == '') {
+            _logoController = AnimationController(
+              duration: const Duration(milliseconds: _durationms*2),
+              vsync: this,
+            )..forward();
 
-          _logoOffsetAnimation = Tween<Offset>(
-            begin: Offset.zero,
-            end: const Offset(0.0, -0.33),
-          ).animate(CurvedAnimation(
-            parent: _logoController,
-            curve: Curves.easeOutExpo,
-          ));
+            _logoOffsetAnimation = Tween<Offset>(
+              begin: Offset.zero,
+              end: Offset(0.0, -0.33),
+            ).animate(CurvedAnimation(
+              parent: _logoController,
+              curve: Curves.easeOutExpo,
+            ));
 
-          _opacity = 1.0;
+            _opacity = 1.0;
+          } else {
+            _logoController = AnimationController(
+              duration: const Duration(milliseconds: _durationms),
+              vsync: this,
+            )..forward();
+
+            _logoController.addStatusListener((status) {
+              if (status == AnimationStatus.completed) {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(_routeDashboard());
+              }
+            });
+
+            _logoOffsetAnimation = Tween<Offset>(
+              begin: Offset.zero,
+              end: Offset(0.0, -1.5),
+            ).animate(CurvedAnimation(
+              parent: _logoController,
+              curve: Curves.easeOut,
+            ));
+          }
         });
       }
     });
     _logoOffsetAnimation = Tween<Offset>(
-      begin: const Offset(0.0, -1.0),
+      begin: const Offset(0.0, -1.5),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _logoController,

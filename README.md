@@ -1,6 +1,6 @@
 # Local Nano
 
-A marketplace built on top of Nano currency.
+A marketplace built on top of Nano currency & created with Flutter.
 
 ## Screenshots
 ![Alt text](/screenshots/localnano.png?raw=true "Local Nano")
