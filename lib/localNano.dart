@@ -1,11 +1,11 @@
+import 'constants.dart' as Constants;
+
 import 'package:flutter/material.dart';
 import 'package:local_nano/dashboard.dart';
 import 'package:local_nano/importAccount.dart';
 import 'package:local_nano/newAccount.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'constants.dart' as Constants;
 
 class LocalNano extends StatelessWidget {
   @override
@@ -32,82 +32,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   static const int _durationms = 1000;
   static const double _buttonHeight = 80;
 
+  String _existingAccount = "";
+  double _opacity = 0.0;
+
   AnimationController _logoController;
   Animation<Offset> _logoOffsetAnimation;
-
-  double _opacity = 0.0;
-  String _existingAccount = "";
-
-  void _loadExistingAccount() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var existing = prefs.getString(Constants.PREFS_PRIVATE);
-    if (existing != null) {
-      setState(() {
-        _existingAccount = existing;
-      });
-    }
-  }
-
-  Route _routeNew() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => NewAccount(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeOutSine;
-        var tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
-      },
-    );
-  }
-
-  Route _routeImport() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => ImportAccount(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(-1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.easeOutSine;
-        final tween = Tween(
-          begin: begin,
-          end: end,
-        ).chain(CurveTween(curve: curve));
-        final offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
-      },
-    );
-  }
-
-  Route _routeDashboard() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-
-        final tween = Tween(
-          begin: 0.0,
-          end: 1.0,
-        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
-        final fadeAnimation = animation.drive(tween);
-
-        return FadeTransition(
-          opacity: fadeAnimation,
-          child: child,
-        );
-      },
-    );
-  }
 
   @override
   void dispose() {
@@ -124,15 +53,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     // animations
     _logoController = AnimationController(
-      duration: const Duration(milliseconds: _durationms*2),
+      duration: const Duration(milliseconds: _durationms * 2),
       vsync: this,
     )..forward();
+
     _logoController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() {
           if (_existingAccount == '') {
             _logoController = AnimationController(
-              duration: const Duration(milliseconds: _durationms*2),
+              duration: const Duration(milliseconds: _durationms * 2),
               vsync: this,
             )..forward();
 
@@ -169,6 +99,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         });
       }
     });
+
     _logoOffsetAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.5),
       end: Offset.zero,
@@ -230,9 +161,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       child: SizedBox(
                         height: _buttonHeight,
                         child: FlatButton(
-                          onPressed: () {
-                            Navigator.of(context).push(_routeImport());
-                          },
+                          onPressed: () =>
+                              Navigator.of(context).push(_routeImport()),
                           child: const Text(
                             'Import',
                             style: const TextStyle(
@@ -247,9 +177,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       child: SizedBox(
                         height: _buttonHeight,
                         child: FlatButton(
-                          onPressed: () {
-                            Navigator.of(context).push(_routeNew());
-                          },
+                          onPressed: () =>
+                              Navigator.of(context).push(_routeNew()),
                           child: const Text(
                             'NEW',
                             style: const TextStyle(
@@ -267,6 +196,76 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         ),
       ),
+    );
+  }
+
+  void _loadExistingAccount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var existing = prefs.getString(Constants.PREFS_PRIVATE);
+    if (existing != null) {
+      setState(() {
+        _existingAccount = existing;
+      });
+    }
+  }
+
+  Route _routeNew() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => NewAccount(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeOutSine;
+        var tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
+        var offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
+      },
+    );
+  }
+
+  Route _routeImport() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => ImportAccount(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(-1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeOutSine;
+        final tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
+        final offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
+      },
+    );
+  }
+
+  Route _routeDashboard() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+        final fadeAnimation = animation.drive(tween);
+
+        return FadeTransition(
+          opacity: fadeAnimation,
+          child: child,
+        );
+      },
     );
   }
 }

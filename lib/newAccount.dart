@@ -1,13 +1,11 @@
+import 'constants.dart' as Constants;
+import 'crypto.dart' as Crypto;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:local_nano/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'dart:math';
-
-import "constants.dart" as Constants;
-import 'crypto.dart' as Crypto;
 
 class NewAccount extends StatelessWidget {
   NewAccount({Key key})
@@ -15,62 +13,6 @@ class NewAccount extends StatelessWidget {
         super(key: key);
 
   final String _secretKey;
-
-  Route _routeDashboard() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween(
-          begin: 0.0,
-          end: 1.0,
-        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
-        final fadeAnimation = animation.drive(tween);
-
-        return FadeTransition(
-          opacity: fadeAnimation,
-          child: child,
-        );
-      },
-    );
-  }
-
-  void _savePrivateKey() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(Constants.PREFS_PRIVATE, _secretKey);
-  }
-
-  void _showAlertDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        var yes = FlatButton(
-          onPressed: () {
-            _savePrivateKey();
-
-            Navigator.of(context).pop();
-            Navigator.of(context).push(_routeDashboard());
-          },
-          child: const Text("Yes"),
-        );
-
-        var no = FlatButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('No'),
-        );
-
-        var alert = AlertDialog(
-          title: const Text('Proceed?'),
-          content: const Text('Did you back up your private key?'),
-          actions: [
-            no,
-            yes,
-          ],
-        );
-
-        return alert;
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +85,9 @@ class NewAccount extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(height: 50,),
+                        SizedBox(
+                          height: 50,
+                        ),
                         FlatButton(
                           onPressed: () => _showAlertDialog(context),
                           child: const Text(
@@ -176,6 +120,66 @@ class NewAccount extends StatelessWidget {
               ),
             )),
       ),
+    );
+  }
+
+  Route _routeDashboard() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+        final fadeAnimation = animation.drive(tween);
+
+        return FadeTransition(
+          opacity: fadeAnimation,
+          child: child,
+        );
+      },
+    );
+  }
+
+  void _savePrivateKey() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(Constants.PREFS_PRIVATE, _secretKey);
+  }
+
+  void _showAlertDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        var yes = FlatButton(
+          onPressed: () {
+            _savePrivateKey();
+            Navigator.of(context).pop();
+            Navigator.of(context).push(_routeDashboard());
+          },
+          child: const Text("Yes"),
+        );
+
+        var no = FlatButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text(
+            'No',
+            style: const TextStyle(
+              color: Colors.grey,
+            ),
+          ),
+        );
+
+        var alert = AlertDialog(
+          title: const Text('Proceed?'),
+          content: const Text('Did you back up your private key?'),
+          actions: [
+            no,
+            yes,
+          ],
+        );
+
+        return alert;
+      },
     );
   }
 }

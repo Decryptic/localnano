@@ -1,9 +1,9 @@
+import 'constants.dart' as Constants;
+import 'crypto.dart' as Crypto;
+
 import 'package:flutter/material.dart';
 import 'package:local_nano/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'constants.dart' as Constants;
-import 'crypto.dart' as Crypto;
 
 class ImportAccount extends StatefulWidget {
   ImportAccount({Key key}) : super(key: key);
@@ -13,37 +13,14 @@ class ImportAccount extends StatefulWidget {
 }
 
 class _ImportAccountState extends State<ImportAccount> {
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   bool _obscure = true;
   bool _enabled = false;
   final _controller = TextEditingController();
 
-  Route _routeDashboard() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween(
-          begin: 0.0,
-          end: 1.0,
-        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
-        final fadeAnimation = animation.drive(tween);
-
-        return FadeTransition(
-          opacity: fadeAnimation,
-          child: child,
-        );
-      },
-    );
-  }
-
-  void _savePrivateKey() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(Constants.PREFS_PRIVATE, _controller.text);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -91,7 +68,9 @@ class _ImportAccountState extends State<ImportAccount> {
                           color: Colors.red,
                         ),
                       ),
-                      SizedBox(height: 50,),
+                      SizedBox(
+                        height: 50,
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -115,9 +94,9 @@ class _ImportAccountState extends State<ImportAccount> {
                           ),
                           FlatButton(
                             onPressed: () {
-                              setState(() {
-                                _obscure = !_obscure;
-                              });
+                              setState(
+                                () => _obscure = !_obscure,
+                              ); // toggle obscure text
                             },
                             child: Icon(_obscure
                                 ? Icons.lock_outline
@@ -167,5 +146,28 @@ class _ImportAccountState extends State<ImportAccount> {
         ),
       ),
     );
+  }
+
+  Route _routeDashboard() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => Dashboard(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(
+          begin: 0.0,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+        final fadeAnimation = animation.drive(tween);
+
+        return FadeTransition(
+          opacity: fadeAnimation,
+          child: child,
+        );
+      },
+    );
+  }
+
+  void _savePrivateKey() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(Constants.PREFS_PRIVATE, _controller.text);
   }
 }

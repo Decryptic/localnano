@@ -19,11 +19,10 @@ const NEW_KEY_ADVICE =
         "security, it is recommended to write this key down on " +
         "several pieces of paper, and keep them in a safe & " +
         "secret place.";
-
 const IMPORT_ADVICE =
- "Warning! Importing, or attempting to use, a compromised private " +
-     "key on WeNano may result in the loss of all funds! You alone " +
-     "are responsible for your funds. Keep your keys secret.";
+    "Warning! Importing, or attempting to use, a compromised private " +
+        "key on WeNano may result in the loss of all funds! You alone " +
+        "are responsible for your funds. Keep your keys secret.";
 
 const double BTN_FONT_SIZE = 24;
 const BTN_COLOR = Colors.blueAccent;
