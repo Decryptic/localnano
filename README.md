@@ -3,7 +3,9 @@
 A marketplace built on top of Nano currency & created with Flutter.
 
 ## Screenshots
+![Alt text](/screenshots/importAccount.png?raw=true "Import Account")
 ![Alt text](/screenshots/localnano.png?raw=true "Local Nano")
+![Alt text](/screenshots/newAccount.png?raw=true "New Account")
 
 ## About
 LocalNano is a layer 2 marketplace developed on top of the Nano
