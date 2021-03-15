@@ -29,11 +29,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  static const int _durationms = 1000;
-  static const double _buttonHeight = 80;
+  static const int _durationms = 1000;    // typical duration of animations in milliseconds
+  static const double _buttonHeight = 80; // height of the NEW and Import FlatButtons
 
-  String _existingAccount = "";
-  double _opacity = 0.0;
+  String _existingAccount = ""; // initState() will load an existing private key from preferences, if any
+  double _opacity = 0.0;        // initial opacity of NEW and Import buttons
 
   AnimationController _logoController;
   Animation<Offset> _logoOffsetAnimation;
@@ -52,21 +52,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _loadExistingAccount();
 
     // animations
-    _logoController = AnimationController(
+    _logoController = AnimationController( // rate at which logo will drop into view
       duration: const Duration(milliseconds: _durationms * 2),
       vsync: this,
     )..forward();
 
-    _logoController.addStatusListener((status) {
+    _logoController.addStatusListener((status) { // after the first animation
       if (status == AnimationStatus.completed) {
         setState(() {
-          if (_existingAccount == '') {
-            _logoController = AnimationController(
+          if (_existingAccount != '') { // DEBUG if no account exists in preferences
+            _logoController = AnimationController( // logo will take 2 seconds
               duration: const Duration(milliseconds: _durationms * 2),
               vsync: this,
             )..forward();
 
-            _logoOffsetAnimation = Tween<Offset>(
+            _logoOffsetAnimation = Tween<Offset>( // to translate to the home position
               begin: Offset.zero,
               end: Offset(0.0, -0.33),
             ).animate(CurvedAnimation(
@@ -74,23 +74,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               curve: Curves.easeOutExpo,
             ));
 
-            _opacity = 1.0;
+            _opacity = 1.0; // fade in the NEW and Import buttons
           } else {
-            _logoController = AnimationController(
-              duration: const Duration(milliseconds: _durationms),
+            _logoController = AnimationController( // animate the logo out of the frame
+              duration: const Duration(milliseconds: _durationms), // in half the time as other animations
               vsync: this,
             )..forward();
 
-            _logoController.addStatusListener((status) {
+            _logoController.addStatusListener((status) { // upon completion
               if (status == AnimationStatus.completed) {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(_routeDashboard());
+                Navigator.of(context).pop(); // make dashboard the base of the stack
+                Navigator.of(context).push(_routeDashboard()); // show the dashboard
               }
             });
 
             _logoOffsetAnimation = Tween<Offset>(
               begin: Offset.zero,
-              end: Offset(0.0, -1.5),
+              end: Offset(0.0, -1.75), // out of the frame
             ).animate(CurvedAnimation(
               parent: _logoController,
               curve: Curves.easeOut,
@@ -100,9 +100,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
     });
 
-    _logoOffsetAnimation = Tween<Offset>(
-      begin: const Offset(0.0, -1.5),
-      end: Offset.zero,
+    _logoOffsetAnimation = Tween<Offset>( // logo starts
+      begin: const Offset(0.0, -1.5), // outside of view, then ends
+      end: Offset.zero, // in the middle of the screen
     ).animate(CurvedAnimation(
       parent: _logoController,
       curve: Curves.bounceOut,
@@ -111,15 +111,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return GestureDetector( // detects swipe gestures across the whole homepage view
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity < 0)
-          Navigator.of(context).push(_routeNew());
+          Navigator.of(context).push(_routeNew()); // left is NewAccount
         else if (details.primaryVelocity > 0)
-          Navigator.of(context).push(_routeImport());
+          Navigator.of(context).push(_routeImport()); // right is ImportAccount
       },
       child: Scaffold(
-        body: Container(
+        body: Container( // gradient
           alignment: Alignment.center,
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -131,11 +131,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               end: Alignment.bottomCenter,
             ),
           ),
-          child: Column(
+          child: Column( // buttons and logo
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SlideTransition(
+              SlideTransition( // logo
                 position: _logoOffsetAnimation,
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -146,13 +146,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           image: AssetImage('assets/images/localnano.png'),
                         ),
                         onPressed: () async {
-                          const url = Constants.WWW_URL;
+                          const url = Constants.BASE_URL;
                           if (await canLaunch(url)) await launch(url);
                         },
                       ),
                     ]),
               ),
-              AnimatedOpacity(
+              AnimatedOpacity( // buttons
                 duration: const Duration(milliseconds: _durationms),
                 opacity: _opacity,
                 child: Row(
@@ -199,7 +199,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  void _loadExistingAccount() async {
+  void _loadExistingAccount() async { // loads existing account from preferences, if any
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var existing = prefs.getString(Constants.PREFS_PRIVATE);
     if (existing != null) {

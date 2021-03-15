@@ -62,10 +62,22 @@ class _ImportAccountState extends State<ImportAccount> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        Constants.IMPORT_ADVICE,
+                        'Only nano accounts created with LocalNano may be imported.',
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.red,
+                          fontSize: 20,
+                        ),
+                      ),
+                      const SizedBox(height: 10,),
+                      const Padding(
+                        padding: const EdgeInsets.only(left: 16, right: 16,),
+                        child: const Text(
+                          Constants.IMPORT_ADVICE,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.red,
+                          ),
                         ),
                       ),
                       SizedBox(

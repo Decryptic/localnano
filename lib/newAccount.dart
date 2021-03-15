@@ -62,7 +62,7 @@ class NewAccount extends StatelessWidget {
                                 child: Text(
                                   _secretKey,
                                   style: const TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 21,
                                     color: Colors.red,
                                   ),
                                 ),
