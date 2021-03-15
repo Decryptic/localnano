@@ -21,7 +21,9 @@ const IMPORT_ADVICE = // advice per the ImportAccount route
         "are responsible for your funds. Keep your keys secret.";
 
 const double BTN_FONT_SIZE =
-    24; // default value for navigation FlatButton height
+    24; // default value for navigation TextButton height
+const double BACK_BTN_FONT_SIZE =
+    18; // default value for back navigation TextButton height
 const BTN_COLOR = Colors.blueAccent; // default color for navigation buttons
 
 const PREFS_PRIVATE = 'private'; // key:v for 64 character hex private key

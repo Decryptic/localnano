@@ -1,7 +1,7 @@
 import 'constants.dart' as Constants;
-import 'crypto.dart' as Crypto;
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:local_nano/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,7 +29,7 @@ class _ImportAccountState extends State<ImportAccount> {
 
     _controller.addListener(() async {
       setState(
-        () => _enabled = Crypto.isPrivateKey(_controller.text),
+        () => _enabled = _controller.text.length == 64,
       );
     });
   }
@@ -68,9 +68,14 @@ class _ImportAccountState extends State<ImportAccount> {
                           fontSize: 20,
                         ),
                       ),
-                      const SizedBox(height: 10,),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       const Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16,),
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                        ),
                         child: const Text(
                           Constants.IMPORT_ADVICE,
                           textAlign: TextAlign.center,
@@ -80,7 +85,7 @@ class _ImportAccountState extends State<ImportAccount> {
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 50,
                       ),
                       Row(
@@ -104,7 +109,7 @@ class _ImportAccountState extends State<ImportAccount> {
                               ),
                             ),
                           ),
-                          FlatButton(
+                          TextButton(
                             onPressed: () {
                               setState(
                                 () => _obscure = !_obscure,
@@ -116,14 +121,35 @@ class _ImportAccountState extends State<ImportAccount> {
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 50,
                       ),
-                      FlatButton(
+                      TextButton(
                         onPressed: _enabled
                             ? () {
-                                _savePrivateKey();
-                                Navigator.of(context).push(_routeDashboard());
+                                _controller.text =
+                                    _controller.text.toUpperCase();
+                                FocusScope.of(context).unfocus();
+
+                                bool validKey = true;
+                                for (int i = 0;
+                                    i < _controller.text.length;
+                                    i++) {
+                                  validKey = validKey &&
+                                      '0123456789ABCDEF'
+                                          .contains(_controller.text[i]);
+                                }
+
+                                if (validKey) {
+                                  _savePrivateKey();
+                                  Navigator.of(context).push(_routeDashboard());
+                                } else {
+                                  return Fluttertoast.showToast(
+                                    msg: 'key contains invalid characters',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                  );
+                                }
                               }
                             : null,
                         child: Text(
@@ -140,12 +166,12 @@ class _ImportAccountState extends State<ImportAccount> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    FlatButton(
+                    TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       child: const Text(
                         'Back',
                         style: const TextStyle(
-                          fontSize: Constants.BTN_FONT_SIZE,
+                          fontSize: Constants.BACK_BTN_FONT_SIZE,
                           color: Constants.BTN_COLOR,
                         ),
                       ),

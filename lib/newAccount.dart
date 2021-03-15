@@ -1,15 +1,15 @@
 import 'constants.dart' as Constants;
-import 'crypto.dart' as Crypto;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_nano_ffi/flutter_nano_ffi.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:local_nano/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NewAccount extends StatelessWidget {
   NewAccount({Key key})
-      : _secretKey = Crypto.generateSecretKey(),
+      : _secretKey = NanoSeeds.generateSeed(),
         super(key: key);
 
   final String _secretKey;
@@ -17,6 +17,7 @@ class NewAccount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // swiping right goes back to homepage
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity > 0) Navigator.of(context).pop();
       },
@@ -68,7 +69,7 @@ class NewAccount extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            FlatButton(
+                            TextButton(
                               onPressed: () {
                                 Clipboard.setData(
                                     ClipboardData(text: _secretKey));
@@ -85,10 +86,10 @@ class NewAccount extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 50,
                         ),
-                        FlatButton(
+                        TextButton(
                           onPressed: () => _showAlertDialog(context),
                           child: const Text(
                             'I agree',
@@ -104,12 +105,12 @@ class NewAccount extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      FlatButton(
+                      TextButton(
                         onPressed: () => Navigator.of(context).pop(),
                         child: const Text(
                           'Back',
                           style: const TextStyle(
-                            fontSize: Constants.BTN_FONT_SIZE,
+                            fontSize: Constants.BACK_BTN_FONT_SIZE,
                             color: Constants.BTN_COLOR,
                           ),
                         ),
@@ -141,25 +142,31 @@ class NewAccount extends StatelessWidget {
     );
   }
 
-  void _savePrivateKey() async {
+  void _saveKeys() async {
+    // shoutout to appditto.com and the Banano team!
+    String privateKey = NanoKeys.seedToPrivate(_secretKey, 0);
+    String publicKey  = NanoKeys.createPublicKey(privateKey);
+    String address    = NanoAccounts.createAccount(NanoAccountType.NANO, publicKey);
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(Constants.PREFS_PRIVATE, _secretKey);
+    await prefs.setString(Constants.PREFS_PUBLIC, address);
   }
 
   void _showAlertDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        var yes = FlatButton(
+        var yes = TextButton(
           onPressed: () {
-            _savePrivateKey();
+            _saveKeys();
             Navigator.of(context).pop();
             Navigator.of(context).push(_routeDashboard());
           },
           child: const Text("Yes"),
         );
 
-        var no = FlatButton(
+        var no = TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text(
             'No',

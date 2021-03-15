@@ -141,7 +141,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      FlatButton(
+                      TextButton(
                         child: Image(
                           image: AssetImage('assets/images/localnano.png'),
                         ),
@@ -160,7 +160,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Expanded(
                       child: SizedBox(
                         height: _buttonHeight,
-                        child: FlatButton(
+                        child: TextButton(
                           onPressed: () =>
                               Navigator.of(context).push(_routeImport()),
                           child: const Text(
@@ -176,10 +176,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Expanded(
                       child: SizedBox(
                         height: _buttonHeight,
-                        child: FlatButton(
+                        child: TextButton(
                           onPressed: () =>
                               Navigator.of(context).push(_routeNew()),
-                          child: const Text(
+                          child: Text(
                             'NEW',
                             style: const TextStyle(
                               fontSize: Constants.BTN_FONT_SIZE,
